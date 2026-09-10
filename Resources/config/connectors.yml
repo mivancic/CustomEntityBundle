@@ -1,6 +1,5 @@
 parameters:
     pim_custom_entity.reader.database.reference_data.class: Pim\Bundle\CustomEntityBundle\Connector\Reader\Database\ReferenceDataReader
-    pim_custom_entity.reader.database.mass_edit_reference_data.class: Pim\Bundle\CustomEntityBundle\Connector\Reader\Database\MassEditReferenceDataReader
 
     pim_custom_entity.processor.denormalization.reference_data.class: Pim\Bundle\CustomEntityBundle\Connector\Processor\Denormalization\ReferenceDataProcessor
     pim_custom_entity.processor.normalization.reference_data.class: Pim\Bundle\CustomEntityBundle\Connector\Processor\Normalization\ReferenceDataProcessor
@@ -49,13 +48,6 @@ services:
             - '@pim_connector.array_converter.dummy'
             - '@pim_connector.factory.flat_item_buffer'
             - '@pim_connector.writer.file.flat_item_buffer_flusher'
-
-    # Quick export connector
-    pim_custom_entity.reader.database.mass_edit_reference_data:
-        class: '%pim_custom_entity.reader.database.mass_edit_reference_data.class%'
-        arguments:
-            - '@doctrine.orm.entity_manager'
-            - '@pim_reference_data.registry'
 
     pim_custom_entity.array_converter.flat_to_standard.reference_data:
         class: '%pim_custom_entity.array_converter.flat_to_standard.reference_data.class%'

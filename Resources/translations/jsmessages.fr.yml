@@ -46,9 +46,6 @@ batch_jobs:
     csv_reference_data_export:
         label: Référentiels en CSV
 
-    csv_reference_data_quick_export:
-        label: Export rapide des référentiels en CSV
-
 pim_enrich:
     form:
         attribute:

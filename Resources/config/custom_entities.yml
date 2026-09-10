@@ -19,6 +19,3 @@ custom_entities:
             rest_update:
                 service: pim_custom_entity.action.rest.update
                 enabled: true
-            quick_export:
-                service: pim_custom_entity.action.quick_export
-                enabled: true
