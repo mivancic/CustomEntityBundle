@@ -29,7 +29,3 @@ batch_jobs:
         export.label: Export référentiels
         label: Export référentiels en CSV
 
-    csv_reference_data_quick_export:
-        quick_export.label: Export rapide référentiels en CSV
-        label: Export rapide référentiels en CSV
-

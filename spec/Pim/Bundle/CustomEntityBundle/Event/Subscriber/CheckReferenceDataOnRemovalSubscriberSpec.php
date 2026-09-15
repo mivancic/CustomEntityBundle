@@ -5,19 +5,12 @@ namespace spec\Pim\Bundle\CustomEntityBundle\Event\Subscriber;
 use Akeneo\Tool\Component\StorageUtils\Event\RemoveEvent;
 use Akeneo\Tool\Component\StorageUtils\StorageEvents;
 use Doctrine\ORM\EntityManagerInterface;
-use Oro\Bundle\DataGridBundle\Datagrid\DatagridInterface;
 use PhpSpec\ObjectBehavior;
-use Pim\Bundle\CustomEntityBundle\Configuration\Configuration;
 use Pim\Bundle\CustomEntityBundle\Configuration\Registry;
 use Pim\Bundle\CustomEntityBundle\Entity\AbstractCustomEntity;
 use Pim\Bundle\CustomEntityBundle\Entity\Repository\AttributeRepository;
-use Pim\Bundle\CustomEntityBundle\Entity\Repository\CustomEntityRepository;
 use Pim\Bundle\CustomEntityBundle\Event\Subscriber\CheckReferenceDataOnRemovalSubscriber;
 use Pim\Bundle\CustomEntityBundle\Remover\NonRemovableEntityException;
-use Oro\Bundle\PimDataGridBundle\Datasource\DatasourceInterface;
-use Oro\Bundle\PimDataGridBundle\Datasource\ResultRecord\Orm\ObjectIdHydrator;
-use Oro\Bundle\PimDataGridBundle\Extension\MassAction\Event\MassActionEvent;
-use Oro\Bundle\PimDataGridBundle\Extension\MassAction\Event\MassActionEvents;
 use Akeneo\Pim\Structure\Component\Model\AttributeInterface;
 use Akeneo\Pim\Enrichment\Component\Product\Query\Filter\Operators;
 use Akeneo\Pim\Enrichment\Component\Product\Query\ProductQueryBuilderFactoryInterface;
@@ -53,8 +46,7 @@ class CheckReferenceDataOnRemovalSubscriberSpec extends ObjectBehavior
     function it_subscribes_to_pre_remove_events()
     {
         $this->getSubscribedEvents()->shouldHaveKey(StorageEvents::PRE_REMOVE);
-        $this->getSubscribedEvents()->shouldHaveKey(MassActionEvents::MASS_DELETE_PRE_HANDLER);
-        $this->getSubscribedEvents()->shouldHaveCount(2);
+        $this->getSubscribedEvents()->shouldHaveCount(1);
     }
 
     function it_does_not_check_other_entities_than_reference_data(RemoveEvent $event, AbstractCustomEntity $object)
@@ -114,55 +106,5 @@ class CheckReferenceDataOnRemovalSubscriberSpec extends ObjectBehavior
         $this
             ->shouldThrow(NonRemovableEntityException::class)
             ->during('checkReferenceDataUsage', [$event]);
-    }
-
-    function it_only_checks_for_reference_data_registry_names(
-        MassActionEvent $event,
-        DatagridInterface $datagrid,
-        $configRegistry
-    ) {
-        $event->getDatagrid()->willReturn($datagrid);
-        $datagrid->getName()->willReturn('product');
-        $configRegistry->has('product')->willReturn(false);
-
-        $this->checkReferenceDataIdsUsage($event)->shouldReturn(null);
-    }
-
-    function it_checks_many_reference_data_usage(
-        MassActionEvent $event,
-        DatagridInterface $datagrid,
-        DatasourceInterface $datasource,
-        Configuration $config,
-        AttributeRepository $attributeRepository,
-        AttributeInterface $attribute,
-        CustomEntityRepository $refDataRepository,
-        ProductQueryBuilderFactoryInterface $pqbFactory,
-        ProductQueryBuilderInterface $pqb,
-        \Countable $countable,
-        $configRegistry,
-        $em
-    ) {
-        $configRegistry->has('color')->willReturn(true);
-        $configRegistry->get('color')->willReturn($config);
-        $config->getEntityClass()->willReturn('MyColorFQCN');
-
-        $event->getDatagrid()->willReturn($datagrid);
-        $datagrid->getName()->willReturn('color');
-        $datagrid->getDatasource()->willReturn($datasource);
-        $datasource->setHydrator(new ObjectIdHydrator())->shouldBeCalled();
-        $datasource->getResults()->willReturn([1, 3]);
-
-        $attributeRepository->getAttributesByReferenceDataName('color')->willReturn([$attribute]);
-        $attribute->getCode()->willReturn('main_color');
-        $em->getRepository('MyColorFQCN')->willReturn($refDataRepository);
-        $refDataRepository->findReferenceDataCodesFromIds([1, 3])->willReturn(['green', 'purple']);
-
-        $pqbFactory->create()->willReturn($pqb);
-        $pqb->addFilter('main_color', Operators::IN_LIST, ['green', 'purple'])->shouldBeCalled();
-        $pqb->execute()->willReturn($countable);
-
-        $countable->count()->willReturn(0);
-
-        $this->checkReferenceDataIdsUsage($event)->shouldReturn(null);
     }
 }

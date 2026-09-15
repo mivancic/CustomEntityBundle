@@ -49,19 +49,6 @@ pim_customentity_rest_edit:
         id: \d+
     methods: [POST]
 
-pim_customentity_massedit:
-    path: /{customEntityName}/mass-edit
-    defaults:
-        _controller: pim_custom_entity.controller:executeAction
-        actionType: mass_edit
-
-pim_customentity_quickexport:
-    path: /{customEntityName}/export.{_format}
-    defaults:
-        _controller: pim_custom_entity.controller:executeAction
-        actionType: quick_export
-        _format: csv
-
 pim_customentity_history:
     path: /{customEntityName}/{id}/history
     defaults:

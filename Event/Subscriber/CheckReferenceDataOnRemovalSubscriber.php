@@ -7,9 +7,6 @@ use Akeneo\Pim\Enrichment\Component\Product\Query\ProductQueryBuilderFactoryInte
 use Akeneo\Tool\Component\StorageUtils\Event\RemoveEvent;
 use Akeneo\Tool\Component\StorageUtils\StorageEvents;
 use Doctrine\ORM\EntityManagerInterface;
-use Oro\Bundle\PimDataGridBundle\Datasource\ResultRecord\Orm\ObjectIdHydrator;
-use Oro\Bundle\PimDataGridBundle\Extension\MassAction\Event\MassActionEvent;
-use Oro\Bundle\PimDataGridBundle\Extension\MassAction\Event\MassActionEvents;
 use Pim\Bundle\CustomEntityBundle\Configuration\Registry;
 use Pim\Bundle\CustomEntityBundle\Entity\AbstractCustomEntity;
 use Pim\Bundle\CustomEntityBundle\Entity\Repository\AttributeRepository;
@@ -61,33 +58,7 @@ class CheckReferenceDataOnRemovalSubscriber implements EventSubscriberInterface
     {
         return [
             StorageEvents::PRE_REMOVE => 'checkReferenceDataUsage',
-            MassActionEvents::MASS_DELETE_PRE_HANDLER => 'checkReferenceDataIdsUsage'
         ];
-    }
-
-    /**
-     * Checks if the reference data ids are used in a product
-     *
-     * @param MassActionEvent $event
-     *
-     * @return null
-     */
-    public function checkReferenceDataIdsUsage(MassActionEvent $event)
-    {
-        $referenceDataName = $event->getDatagrid()->getName();
-        if (!$this->configRegistry->has($referenceDataName)) {
-            return;
-        }
-        $entityClass = $this->configRegistry->get($referenceDataName)->getEntityClass();
-
-        $datasource = $event->getDatagrid()->getDatasource();
-        $datasource->setHydrator(new ObjectIdHydrator());
-        $referenceDataIds = $datasource->getResults();
-
-        $attributes = $this->attributeRepository->getAttributesByReferenceDataName($referenceDataName);
-        $referenceDataCodes = $this->em->getRepository($entityClass)->findReferenceDataCodesFromIds($referenceDataIds);
-
-        $this->checkProductLink($attributes, $referenceDataCodes);
     }
 
     /**
