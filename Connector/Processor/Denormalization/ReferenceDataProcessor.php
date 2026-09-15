@@ -181,7 +181,7 @@ class ReferenceDataProcessor implements ItemProcessorInterface, StepExecutionAwa
      *
      * @throws InvalidItemException
      */
-    protected function skipItemWithMessage(array $item, $message, \Exception $previousException = null)
+    protected function skipItemWithMessage(array $item, $message, ?\Exception $previousException = null)
     {
         if ($this->stepExecution) {
             $this->stepExecution->incrementSummaryInfo('skip');
